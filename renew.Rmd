@@ -1,0 +1,107 @@
+---
+title: "续保行为分析"
+runtime: shiny
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(knitr)
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+
+
+knitr::opts_chunk$set(echo = TRUE )
+
+
+```
+
+This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+
+To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+
+##逐月保单数量
+```{r hello, echo=FALSE,fig.width=12}
+
+mydata<-read_csv(file="./dataset/renew.txt",
+            col_types =list(
+                      COMCODE1 = col_character(),
+                      VEH_USE_CN = col_character(),
+                      RISKCODE = col_character(),
+                      GRP_RENEW_IND = col_character(),
+                      核保年月 = col_character(),
+                      生效月份 = col_character(),
+                      是否贷款车 = col_character(),
+                      是否短期单 = col_character(),
+                      渠道代码 = col_character(),
+                      PREMIUM = col_double(),
+                      延迟天数 = col_double(),
+                      保单数量 = col_integer()
+            ))
+
+  mydata %>%
+  
+ 
+  filter(生效月份<=paste(substr(as.character(today()),1,4),substr(as.character(today()),6,7),sep=''))     %>%
+  
+ group_by(生效月份) %>%
+    
+ summarise(plycnt=sum(保单数量,na.rm=TRUE)) %>%
+  
+  
+
+
+ggplot(aes(x=生效月份,weight=plycnt/10000))+geom_bar(fill='grey')+xlab("Policy Month")+ylab("Policy Count\n X 10K")+theme_classic()
+
+
+```
+
+##平均提前签单天数
+```{r avg delay, echo=FALSE}
+
+
+
+inputPanel(
+  selectInput("valmth", label = "评估月份:",
+              choices = c(201701:201712), selected = 201705),
+
+  selectInput("comcode", label = "分公司:",
+              choices = sort(unique(mydata$COMCODE1)),multiple=TRUE,selected = "11",selectize=FALSE),
+ 
+  
+  selectInput("veh_use", label = "使用性质:",
+              choices = sort(unique(mydata$VEH_USE_CN)),multiple=TRUE,selected = "家用车",selectize=FALSE)
+  
+           )
+
+
+renderPlot({
+
+   mydata %>%
+          
+         filter(as.numeric(生效月份)<= input$valmth) %>%
+        
+         filter(COMCODE1 %in% input$comcode ) %>%
+       
+         filter(VEH_USE_CN %in% input$veh_use ) %>%
+  
+         mutate(保单年=substr(生效月份,1,4),
+                保单月=substr(生效月份,5,7)
+                   
+                   )  %>%
+         group_by(保单年,保单月) %>%
+         summarise(
+                保单数量=sum(保单数量,na.rm=TRUE),
+                延迟天数=-1*sum(延迟天数,na.rm=TRUE),
+                保费收入=sum(PREMIUM,na.rm=TRUE),
+                平均续保=延迟天数/保单数量
+         )  %>%
+  
+         ggplot(aes(x=保单月,y=平均续保,colour=保单年,group=保单年))+geom_line()+theme_classic()
+         
+  
+})
+
+```
