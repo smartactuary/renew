@@ -1,5 +1,5 @@
 ---
-title: "续保行为分析"
+title: "车险续保情况监控"
 runtime: shiny
 output: html_document
 ---
@@ -18,11 +18,11 @@ knitr::opts_chunk$set(echo = TRUE )
 
 ```
 
-This R Markdown document is made interactive using Shiny. Unlike the more traditional workflow of creating static reports, you can now create documents that allow your readers to change the assumptions underlying your analysis and see the results immediately. 
+    这一监控界面主要用于监控公司续保工作改善成效情况，主要监控一下几个方面：一是各月的保单数量的业务发展情况；二是保单生效月份的平均提前签单天数的趋势分析，可以从各维度作详细的趋势分析；三四从各维度横向对比分析平均提前签单天数，通过横向对比，找差距，发现哪些机构、渠道做的好，哪些做的不好，寻找薄弱环节，发现亮点，把公司的续保工作做的更好。
 
 To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
 
-##逐月保单数量
+##一、逐月保单数量
 ```{r hello, echo=FALSE,fig.width=12}
 
 mydata<-read_csv(file="./dataset/renew.txt",
@@ -58,7 +58,9 @@ ggplot(aes(x=生效月份,weight=plycnt/10000))+geom_bar(fill='grey')+xlab("Poli
 
 ```
 
-##平均提前签单天数
+##二、平均提前签单天数趋势分析
+
+      2017年续保工作成效显著。从各月份生效保单的平均提前签单天数看，2017年平均提前签单天数较去年同期提升明显。2017年1-5月份生效保单平均来看，一般提前12天签单，2016年同期为9天，同比提升20%。商车费改后，尤其是NCD制度改革影响，客户感受到商业车险的价格大幅波动，客户为获得更为优惠的价格，询行为较费前更为频繁，行业车险业务的续保率均有所下降，在这一大环境下，做好主动与客户提前接触，做好续保工作，对公司存量业务及业务发展至关重要。在总、分公司的共同努力下，2017年续保工作成效显著。
 ```{r avg delay, echo=FALSE}
 
 
@@ -99,9 +101,13 @@ renderPlot({
                 平均续保=延迟天数/保单数量
          )  %>%
   
-         ggplot(aes(x=保单月,y=平均续保,colour=保单年,group=保单年))+geom_line()+theme_classic()
+         ggplot(aes(x=保单月,y=平均续保,colour=保单年,group=保单年))+geom_line()+
+                        xlab("Policy Month")+ylab("avg days")+theme_classic()
+                      
          
   
 })
 
 ```
+
+##三、横向对比分析，找差距，发现亮点(未完，待续)
