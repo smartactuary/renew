@@ -72,7 +72,7 @@ ggplot(data=smalldata,aes(x=生效月份,weight=保单数量))+geom_bar()
  smalldata
  
  rename(smalldata,项目=VEH_USE_CN)
- str(smalldata)
+ str(mydata)
       ??melt
     
  a<-melt(data=smalldata)   
