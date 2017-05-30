@@ -112,3 +112,12 @@ formula( paste("veh_use_cn","~policy_year"))
  
  rm(list=ls())
  
+ ??shinyAppDir
+ 
+ ??runApp
+ 
+ data(cars)
+ 
+ ??numericInput
+ 
+ 
