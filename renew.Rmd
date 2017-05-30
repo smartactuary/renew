@@ -11,6 +11,9 @@ library(readr)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
+library(reshape2)
+library(purrr)
+library(tibble)
 
 
 knitr::opts_chunk$set(echo = TRUE )
@@ -111,3 +114,48 @@ renderPlot({
 ```
 
 ##三、横向对比分析，找差距，发现亮点(未完，待续)
+
+
+```{r vs, echo=FALSE,message=FALSE}
+        
+  
+  inputPanel(
+ 
+  selectInput("item", label = "项目:",
+              choices = c('VEH_USE_CN','COMCODE1','RISKCODE','渠道代码','GRP_RENEW_IND','生效月份'),multiple=FALSE,selected = "VEH_USE_CN",selectize=FALSE)
+  
+           )           
+            
+  options(digits=2)
+   
+  renderDataTable({
+         
+        a<- mydata %>%
+            
+               mutate(保单年=substr(生效月份,1,4),
+                      保单月=substr(生效月份,5,7))  %>%
+               
+               filter(as.numeric(保单月)<month(today()),as.numeric(保单年)<=year(today()))
+          
+        b<-a[,c(input$item,'保单年','保单数量','延迟天数')]    
+        colnames(b)<-c('项目','保单年','保单数量','延迟天数')
+              
+        c<-       b %>%
+               group_by(项目,保单年)  %>%
+               summarise(
+                 保单数量=sum(保单数量,na.rm=TRUE),
+                  
+                  提前签单天数=-1*sum(延迟天数,na.rm=TRUE)/sum(保单数量,na.rm=TRUE)) %>%
+            
+            
+                 melt() %>%
+                 acast(项目~variable+保单年)
+         
+        rm(a,b,mydata)         
+        data.frame(项目=row.names(c),c)
+        
+       
+          
+                  }) 
+
+```
